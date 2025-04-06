@@ -216,6 +216,24 @@ button:disabled {
   </style>
 </head>
 <body>
+        <!-- Win Modal -->
+    <div id="winModal" class="modal hidden">
+      <div class="modal-content">
+        <h2>🎉 You Win!</h2>
+        <p>#<span id="winAttempts"></span> | You've solved the logic puzzle!</p>
+        <button onclick="closeWinModal()">Play Again</button>
+      </div>
+    </div>
+
+    <!-- Loss Modal -->
+    <div id="lossModal" class="modal hidden">
+      <div class="modal-content">
+        <h2>💥 You Lose!</h2>
+        <p>Out of attempts! The correct answer was: <span id="lossAnswer"></span></p>
+        <button onclick="closeLossModal()">Try Again</button>
+      </div>
+    </div>
+
     <div class="info-button" onclick="toggleHowToPlay()">ℹ️</div>
 
     <div id="howToPlayModal" class="modal hidden">
@@ -224,7 +242,7 @@ button:disabled {
         <p>Guess the truth values (T or F) for A, B, C, D, and E based on logical clues.</p>
         <ul>
           <li>Enter a combination like <strong>TFTFT</strong>.</li>
-          <li>You have 5 attempts.</li>
+          <li>You have 1 attempt.</li>
           <li>Green = correct value & position.</li>
           <li>Orange = value is in solution, but wrong position.</li>
           <li>Gray = not in solution at all.</li>
@@ -233,7 +251,8 @@ button:disabled {
       </div>
     </div>
 
-  <h1 class = "hover-grow; shake-on-hover">Logicle</h1>
+  <h1 class = "hover-grow; shake-on-hover">Logicle <span style = "font-size: 1rem">beta</span></h1>
+
   <div id="board"></div>
   <input type="text" id="guessInput" style = "margin-bottom: 20px"placeholder="Enter T/F combo e.g. TFTFT" maxlength="5" />
   <button onclick="submitGuess()">Submit</button>
@@ -246,11 +265,16 @@ button:disabled {
       <li>D is true only if B is false.</li>
       <li>E is true if and only if C is false.</li>
     </ol>
+    <!-- Countdown timer to 12:00 PM Eastern -->
+<div id="timer" style="font-size: 1rem; font-weight: bold; margin-top: 2rem;">
+  Next puzzle in: <span id="countdown"></span>
+</div>
+
   </div>
   <script>
     const solution = ['T', 'F', 'T', 'F', 'F']; // Correct logic solution: A=1, B=0, C=1, D=0, E=0
     let attempts = 0;
-    const maxAttempts = 5;
+    const maxAttempts = 1;
     
     function checkClues(guessArr) {
       // Validate clues manually — for now this is hardcoded for the solution above
@@ -258,50 +282,150 @@ button:disabled {
     }
 
     function submitGuess() {
-      const input = document.getElementById("guessInput");
-      const value = input.value.toUpperCase();
-      if (value.length !== 5 || /[^TF]/.test(value)) {
-        alert("Please enter exactly 5 characters using only T or F.");
-        return;
-      }
+  const input = document.getElementById("guessInput");
+  const value = input.value.toUpperCase();
 
-      if (attempts >= maxAttempts) return;
+  // Input validation (ensure only 'T' or 'F' and 5 characters)
+  if (value.length !== 5 || /[^TF]/.test(value)) {
+    alert("Please enter exactly 5 characters using only T or F.");
+    return;
+  }
 
-      const guessArr = value.split("");
-      const row = document.createElement("div");
-      row.classList.add("guess-row");
+  if (attempts >= maxAttempts) return;
 
-      for (let i = 0; i < 5; i++) {
-        const cell = document.createElement("div");
-        cell.classList.add("cell");
-        cell.textContent = guessArr[i];
+  const guessArr = value.split("");
+  const row = document.createElement("div");
+  row.classList.add("guess-row");
 
-        if (guessArr[i] === solution[i]) {
-          cell.classList.add("correct");
-        } else if (solution.includes(guessArr[i])) {
-          cell.classList.add("present");
-        } else {
-          cell.classList.add("absent");
-        }
-        row.appendChild(cell);
-      }
-      document.getElementById("board").appendChild(row);
+  let correctCount = 0; // Variable to count correct guesses for the current attempt
 
-      attempts++;
+  for (let i = 0; i < 5; i++) {
+    const cell = document.createElement("div");
+    cell.classList.add("cell");
+    cell.textContent = guessArr[i];
 
-      if (checkClues(guessArr)) {
-        alert("🎉 Correct! You've solved the logic puzzle in " + attempts + " tries.");
-        input.disabled = true;
-      } else if (attempts === maxAttempts) {
-        alert("Out of attempts! The correct answer was: " + solution.join(""));
-        input.disabled = true;
-      }
-      input.value = "";
+    if (guessArr[i] === solution[i]) {
+      cell.classList.add("correct");
+      correctCount++;  // Increment correct count for each correct guess
+    } else if (solution.includes(guessArr[i])) {
+      cell.classList.add("present");
+    } else {
+      cell.classList.add("absent");
     }
+    row.appendChild(cell);
+  }
+  
+  // Append the guess row to the board
+  document.getElementById("board").appendChild(row);
+
+  attempts++;
+
+  // Check if all guesses are correct (5 correct answers)
+  if (correctCount === 5) {
+    showWinModal();  // Show the win modal
+    input.disabled = true;
+  } else if (attempts === maxAttempts) {
+    showLossModal();  // Show the loss modal
+    input.disabled = true;
+  }
+
+  input.value = "";  // Clear the input field
+}
+
+// Function to show the win modal
+function showWinModal() {
+  const winModal = document.getElementById("winModal");
+  const winAttempts = document.getElementById("winAttempts");
+  winAttempts.textContent = attempts; // Set the attempts count in the modal
+  winModal.classList.remove("hidden"); // Display the modal
+}
+
+// Function to show the loss modal
+function showLossModal() {
+  const lossModal = document.getElementById("lossModal");
+  const lossAnswer = document.getElementById("lossAnswer");
+  lossAnswer.textContent = solution.join(""); // Show the correct answer in the modal
+  lossModal.classList.remove("hidden"); // Display the modal
+}
+
+// Function to close the win modal and reset the game
+function closeWinModal() {
+  const winModal = document.getElementById("winModal");
+  winModal.classList.add("hidden"); // Hide the modal
+  resetGame(); // Reset the game for a new round
+}
+
+// Function to close the loss modal and reset the game
+function closeLossModal() {
+  const lossModal = document.getElementById("lossModal");
+  lossModal.classList.add("hidden"); // Hide the modal
+  resetGame(); // Reset the game for a new round
+}
+
+// Function to reset the game state
+function resetGame() {
+  attempts = 0;
+  document.getElementById("board").innerHTML = ""; // Clear the board
+  document.getElementById("guessInput").disabled = false; // Enable input again
+  document.getElementById("guessInput").value = ""; // Clear the input field
+}
+
     function toggleHowToPlay() {
         const modal = document.getElementById("howToPlayModal");
         modal.classList.toggle("hidden");
     }
+// Function to get the time remaining until 12:00 PM Eastern
+function getTimeRemaining() {
+  // Get current time in Eastern Time Zone
+  const now = new Date();
+  const offset = -5; // Eastern Time (ET) is UTC -5
+  const easternTime = new Date(now.toLocaleString("en-US", { timeZone: "America/New_York" }));
+
+  // Set the target time to 12:00 PM today (Eastern Time)
+  const targetTime = new Date(easternTime);
+  targetTime.setHours(12, 0, 0, 0); // Set to 12:00 PM today
+
+  // If current time is already past 12:00 PM, set the target time to 12:00 PM tomorrow
+  if (easternTime.getTime() > targetTime.getTime()) {
+    targetTime.setDate(targetTime.getDate() + 1); // Move to the next day
+  }
+
+  // Calculate the difference in milliseconds
+  const timeDifference = targetTime - easternTime;
+
+  return timeDifference;
+}
+
+// Function to format the remaining time (hh:mm:ss)
+function formatTime(ms) {
+  const hours = Math.floor(ms / (1000 * 60 * 60));
+  const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((ms % (1000 * 60)) / 1000);
+
+  return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+}
+
+// Function to start the countdown timer
+function startCountdown() {
+  const countdownElement = document.getElementById("countdown");
+
+  // Update the countdown every second
+  const interval = setInterval(() => {
+    const timeRemaining = getTimeRemaining();
+
+    // If time remaining is less than or equal to 0, stop the countdown
+    if (timeRemaining <= 0) {
+      clearInterval(interval);
+      countdownElement.textContent = "Time's up! New puzzle available.";
+    } else {
+      countdownElement.textContent = formatTime(timeRemaining);
+    }
+  }, 1000);
+}
+
+// Start the countdown when the page loads
+startCountdown();
+
   </script>
 </body>
 </html>
