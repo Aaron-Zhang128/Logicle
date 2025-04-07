@@ -260,11 +260,15 @@ button:disabled {
   <div class="clues; hover-grow">
     <h3>Clues:</h3>
     <ol>
-      <li>If A is true, then B and D are both false.</li>
-      <li>C is true if and only if A and E have opposite truth values.</li>
-      <li>Exactly three of the five variables are true.</li>
-      <li>D is true only if B is false.</li>
-      <li>E is true if and only if C is false.</li>
+      <li>If A is true, then B is false.</li>
+      <li>C is true if and only if D is false.</li>
+      <li>If E is true, then C is also true.</li>
+      <li>Exactly one of A and D is true.</li>
+      <li>B is true only if E is false.</li>
+      <li>Exactly three of them are True.</li>
+
+
+
     </ol>
     <!-- Countdown timer to 12:00 PM Eastern -->
 <div id="timer" style="font-size: 1rem; font-weight: bold; margin-top: 2rem;">
@@ -273,7 +277,7 @@ button:disabled {
 
   </div>
   <script>
-    const solution = ['T', 'F', 'T', 'F', 'F']; // Correct logic solution: A=1, B=0, C=1, D=0, E=0
+    const solution = ['T', 'F', 'T', 'F', 'T']; // Correct logic solution: A=1, B=0, C=1, D=0, E=0
     let attempts = 0;
     const maxAttempts = 1;
     
