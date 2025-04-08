@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" href="logicle_optimized.png" type="image/png" />
   <title>Logicle</title>
+<link rel="icon" href="logicle_optimized.png" sizes="128x128" type="image/png" />
   <style>
     body {
   font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -220,8 +220,8 @@ button:disabled {
         <!-- Win Modal -->
     <div id="winModal" class="modal hidden">
       <div class="modal-content">
-        <h2>🎉 You Win!</h2>
-        <p>#<span id="winAttempts"></span> | You've solved the logic puzzle!</p>
+        <h2>🎉 You Slayed!</h2>
+        <p>You've solved the logic puzzle in <span id="winAttempts"></span> guesses</p>
         <button onclick="closeWinModal()">Play Again</button>
       </div>
     </div>
@@ -229,7 +229,7 @@ button:disabled {
     <!-- Loss Modal -->
     <div id="lossModal" class="modal hidden">
       <div class="modal-content">
-        <h2>💥 You Lose!</h2>
+        <h2>💥 You Lose</h2>
         <p>Out of attempts! The correct answer was: <span id="lossAnswer"></span></p>
         <button onclick="closeLossModal()">Try Again</button>
       </div>
@@ -243,10 +243,11 @@ button:disabled {
         <p>Guess the truth values (T or F) for A, B, C, D, and E based on logical clues.</p>
         <ul>
           <li>Enter a combination like <strong>TFTFT</strong>.</li>
-          <li>You have 1 attempt.</li>
-          <li>Green = correct value & position.</li>
-          <li>Orange = value is in solution, but wrong position.</li>
-          <li>Gray = not in solution at all.</li>
+          <li>You have 5 attempts</li>
+          <li>Grey Box = Your Guess</li>
+          <li>Green Box = How Many Correct</li>
+          
+       
         </ul>
         <button onclick="toggleHowToPlay()">Got it!</button>
       </div>
@@ -257,29 +258,25 @@ button:disabled {
   <div id="board"></div>
   <input type="text" id="guessInput" style = "margin-bottom: 20px"placeholder="Enter T/F combo e.g. TFTFT" maxlength="5" />
   <button onclick="submitGuess()">Submit</button>
-  <div class="clues; hover-grow">
-    <h3>Clues:</h3>
-    <ol>
-      <li>If A is true, then B is false.</li>
-      <li>C is true if and only if D is false.</li>
-      <li>If E is true, then C is also true.</li>
-      <li>Exactly one of A and D is true.</li>
-      <li>B is true only if E is false.</li>
-      <li>Exactly three of them are True.</li>
+  <div class="clues hover-grow">
+  <h3>Clues:</h3>
+  <ol id="clueList">
+    <li class="clue-item">If A is true, then B and D are both false.</li>
+    <li class="clue-item hidden">C is true if and only if A and E have opposite truth values.</li>
+    <li class="clue-item hidden">Exactly three of the five variables are true.</li>
+    <li class="clue-item hidden">D is true only if B is false.</li>
+    <li class="clue-item hidden">E is true if and only if C is false.</li>
+  </ol>
 
-
-
-    </ol>
-    <!-- Countdown timer to 12:00 PM Eastern -->
-<div id="timer" style="font-size: 1rem; font-weight: bold; margin-top: 2rem;">
-  Next puzzle in: <span id="countdown"></span>
-</div>
-
+  <!-- Countdown timer to 12:00 PM Eastern -->
+  <div id="timer" style="font-size: 1rem; font-weight: bold; margin-top: 2rem;">
+    Next puzzle in: <span id="countdown"></span>
   </div>
+</div>
   <script>
-    const solution = ['T', 'F', 'T', 'F', 'T']; // Correct logic solution: A=1, B=0, C=1, D=0, E=0
+    const solution = ['T', 'F', 'T', 'F', 'F']; // Correct logic solution: A=1, B=0, C=1, D=0, E=0
     let attempts = 0;
-    const maxAttempts = 1;
+    const maxAttempts = 5;
     
     function checkClues(guessArr) {
       // Validate clues manually — for now this is hardcoded for the solution above
@@ -304,35 +301,51 @@ button:disabled {
 
   let correctCount = 0; // Variable to count correct guesses for the current attempt
 
-  for (let i = 0; i < 5; i++) {
-    const cell = document.createElement("div");
-    cell.classList.add("cell");
-    cell.textContent = guessArr[i];
+    for (let i = 0; i < 5; i++) {
+      const cell = document.createElement("div");
+      cell.classList.add("cell");
+      cell.textContent = guessArr[i];
 
-    if (guessArr[i] === solution[i]) {
-      cell.classList.add("correct");
-      correctCount++;  // Increment correct count for each correct guess
-    } else if (solution.includes(guessArr[i])) {
-      cell.classList.add("present");
-    } else {
-      cell.classList.add("absent");
+      if (guessArr[i] === solution[i]) {
+        cell.classList.add("absent");
+        correctCount++;
+      } else if (solution.includes(guessArr[i])) {
+        cell.classList.add("absent");
+      } else {
+        cell.classList.add("absent");
+      }
+      row.appendChild(cell);
     }
-    row.appendChild(cell);
-  }
+
+    // ➕ Add sixth box with count of correct answers
+    const countCell = document.createElement("div");
+    countCell.classList.add("cell");
+    countCell.style.backgroundColor = "#4caf50";
+    countCell.style.fontSize = "1rem";
+    countCell.style.fontWeight ="normal";
+    countCell.style.color = "#333";
+    countCell.textContent = `${correctCount}`;
+    countCell.style.fontFamily = "Helvetica";
+
+    row.appendChild(countCell);
+
   
   // Append the guess row to the board
   document.getElementById("board").appendChild(row);
 
   attempts++;
-
+  
   // Check if all guesses are correct (5 correct answers)
   if (correctCount === 5) {
     showWinModal();  // Show the win modal
     input.disabled = true;
   } else if (attempts === maxAttempts) {
-    showLossModal();  // Show the loss modal
+    showLossModal();
     input.disabled = true;
-  }
+    } 
+    else {
+      revealNextClue(); // Reveal a new clue if guess is wrong and attempts remain
+    }
 
   input.value = "";  // Clear the input field
 }
@@ -370,10 +383,22 @@ function closeLossModal() {
 // Function to reset the game state
 function resetGame() {
   attempts = 0;
-  document.getElementById("board").innerHTML = ""; // Clear the board
-  document.getElementById("guessInput").disabled = false; // Enable input again
-  document.getElementById("guessInput").value = ""; // Clear the input field
+  document.getElementById("board").innerHTML = "";
+  const input = document.getElementById("guessInput");
+  input.disabled = false;
+  input.value = "";
+
+  // Hide all clues except the first
+  const clues = document.querySelectorAll(".clue-item");
+  clues.forEach((clue, index) => {
+    if (index === 0) {
+      clue.classList.remove("hidden");
+    } else {
+      clue.classList.add("hidden");
+    }
+  });
 }
+
 
     function toggleHowToPlay() {
         const modal = document.getElementById("howToPlayModal");
@@ -399,6 +424,12 @@ function getTimeRemaining() {
   const timeDifference = targetTime - easternTime;
 
   return timeDifference;
+}
+function revealNextClue() {
+  const clues = document.querySelectorAll(".clue-item.hidden");
+  if (clues.length > 0) {
+    clues[0].classList.remove("hidden");
+  }
 }
 
 // Function to format the remaining time (hh:mm:ss)
@@ -431,6 +462,7 @@ function startCountdown() {
 // Start the countdown when the page loads
 startCountdown();
 
+      
   </script>
 </body>
 </html>
