@@ -266,11 +266,11 @@ button:disabled {
   <div class="clues hover-grow">
   <h3>Clues:</h3>
   <ol id="clueList">
-    <li class="clue-item">If A is true, then exactly two of B, C, and D are false.</li>
-    <li class="clue-item hidden">C is true if and only if both E and F are not the same (i.e., E and F have opposite truth values).</li>
-    <li class="clue-item hidden">Exactly four of the six variables are true.</li>
-    <li class="clue-item hidden">D is true only if both B and F are true.</li>
-    <li class="clue-item hidden">If E is true, then A and C are both false.</li>
+    <li class="clue-item">If A is true, then exactly two of B, C, and D are true.</li>
+    <li class="clue-item hidden">C is true if and only if B and E are different.</li>
+    <li class="clue-item hidden">Exactly three of the five variables are true.</li>
+    <li class="clue-item hidden">D is true only if both A and E are true.</li>
+    <li class="clue-item hidden">If B is false, then A is false.</li>
   </ol>
 
   <!-- Countdown timer to 12:00 PM Eastern -->
@@ -279,7 +279,7 @@ button:disabled {
   </div>
 </div>
   <script>
-    const solution = ['F', 'T', 'T', 'F', 'T']; // Correct logic solution: A=1, B=0, C=1, D=0, E=0
+    const solution = ['T', 'T', 'F', 'T', 'T']; // Correct logic solution: A=1, B=0, C=1, D=0, E=0
     let attempts = 0;
     const maxAttempts = 5;
     
